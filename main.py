@@ -2,6 +2,7 @@ import pygame
 import random
 import time
 import sys
+import math
 
 WIDTH = 1000
 HEIGHT = 500
@@ -11,6 +12,14 @@ SIMULATIONDRAWOFFSETY = 50
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("evolution-simulator-3")
+
+def distanceBetween(a, b):
+    xa = a[0]
+    xb = b[0]
+    ya = a[1]
+    yb = b[1]
+
+    return math.sqrt(((xa - xb)**2) + ((ya - yb)**2))
 
 # main evolution classes
 
@@ -34,13 +43,25 @@ class Population:
             self.individualsList.append(individual)
 
         self.foodSpawner = FoodSpawner(foodToSpawnEachTurn, self.simulationAreaSize, self.pygameScreen)
-    
+        self.foodSpawner.spawnAndDrawFood()
+        for individual in self.individualsList:
+                pygame.draw.circle(self.pygameScreen, (0, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), 8)
+                pygame.draw.circle(self.pygameScreen, (255, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.eatingDistance, 2)
+                pygame.draw.circle(self.pygameScreen, (0, 0, 255), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.visionDistance, 2)
+
     def nextDay(self):
         for individual in self.individualsList:
             # handle the next day (remember pause points!)
             self.foodSpawner.spawnAndDrawFood()
             self.simulationPlayer.pausePoint()
-            individual.eatFood()
+            for individual in self.individualsList:
+                individual.eatFood()
+
+    def redrawIndividuals(self):
+        for individual in self.individualsList:
+            pygame.draw.circle(self.pygameScreen, (0, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), 8)
+            pygame.draw.circle(self.pygameScreen, (255, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.eatingDistance, 2)
+            pygame.draw.circle(self.pygameScreen, (0, 0, 255), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.visionDistance, 2)
 
 
 class Individual:
@@ -51,9 +72,14 @@ class Individual:
         self.familyTree = FamilyTree(parents, generation)
         self.location = location
         self.population = population
+        self.energy = 2
 
     def eatFood(self):
-        pass
+        for food in self.population.foodSpawner.foodList:
+            distance = distanceBetween(food.location, self.location)
+            if distance <= self.eatingDistance:
+                self.energy += food.nutrition
+                self.population.foodSpawner.destroy(food)
         
 
 class FamilyTree:
@@ -87,6 +113,8 @@ class SimulationPlayer:
 
     def redrawSimulation(self):
         self.population.foodSpawner.redrawFood()
+        self.population.redrawIndividuals()
+
 
 class FoodSpawner:
     def __init__(self, foodToSpawnEachTurn, simulationAreaSize, pygameScreen):
@@ -105,6 +133,9 @@ class FoodSpawner:
         for food in self.foodList:
             pygame.draw.circle(self.pygameScreen, (0, 0, 0), (food.location[0] + SIMULATIONDRAWOFFSETX, food.location[1] + SIMULATIONDRAWOFFSETY), 2)
 
+    def destroy(self, food):
+        self.foodList.remove(food)
+
 
 class Food:
     def __init__(self, nutrition, location):
@@ -112,7 +143,8 @@ class Food:
         self.location = location
 
 
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 5, 10, 20, screen, 100)
+# a = amount, m = mutation, e = eating, v = vision                 a   m  e   v
+simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 5, 20, 50, screen, 100)
 
 running = True
 while running:
@@ -120,19 +152,23 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    screen.fill((255, 255, 255))
-    simulationPlayer.redrawGUI()
-    simulationPlayer.redrawSimulation()
-    for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             buttonPressed = simulationPlayer.checkForButtonPresses()
             if buttonPressed == "next":
-                print("sb1")
                 simulationPlayer.population.nextDay()
+
+    screen.fill((255, 255, 255))
+    pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+    simulationPlayer.redrawSimulation()
+    pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
+    pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+    pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400 + 2, WIDTH, SIMULATIONDRAWOFFSETY))
+    pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+    simulationPlayer.redrawGUI()
+        
     buttonPressed = None
 
-    time.sleep(0.01)
+    #time.sleep(0.01)
 
     pygame.display.flip()
 
