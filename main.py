@@ -40,9 +40,11 @@ class Population:
         self.amountOfDeadIndividuals = 0
 
         self.individualsList = []
-        for i in range(1, startingNumberOfIndividuals):
+        for i in range(1, startingNumberOfIndividuals + 1):
             individual = Individual(self.baseEatingDistance, self.baseVisionDistance, self.baseMutationChancePercent, None, 1, [random.randint(0, self.simulationAreaSize["width"]), random.randint(0, self.simulationAreaSize["height"])], self)
             self.individualsList.append(individual)
+
+        self.highestPopulation = len(self.individualsList)
 
         self.foodSpawner = FoodSpawner(foodToSpawnEachTurn, self.simulationAreaSize, self.pygameScreen)
         self.foodSpawner.spawnAndDrawFood()
@@ -51,6 +53,9 @@ class Population:
 
     def nextDay(self):
         # handle the next day (remember pause points!)
+
+        if len(self.individualsList) > self.highestPopulation:
+            self.highestPopulation = len(self.individualsList)
 
         self.foodSpawner.spawnAndDrawFood()
         self.simulationPlayer.setStatusText("Food spawned.")
@@ -259,12 +264,15 @@ class SimulationPlayer:
             self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
 
         text = font.render("Individuals alive: " + str(len(self.population.individualsList)), 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY / 4, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
 
         text = font.render("Day", 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
         text = font.render(str(self.currentDay), 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 20, 0, 0))
+
+        text = font.render("Peak population: " + str(self.population.highestPopulation), 1, (0, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
 
         text = font.render(self.currentStatusText, 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))
