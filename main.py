@@ -3,6 +3,7 @@ import random
 import time
 import sys
 import math
+import threading
 
 WIDTH = 1000
 HEIGHT = 500
@@ -45,37 +46,38 @@ class Population:
 
         self.foodSpawner = FoodSpawner(foodToSpawnEachTurn, self.simulationAreaSize, self.pygameScreen)
         self.foodSpawner.spawnAndDrawFood()
-        for individual in self.individualsList:
-                pygame.draw.circle(self.pygameScreen, (0, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), 8)
-                pygame.draw.circle(self.pygameScreen, (255, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.eatingDistance, 2)
-                pygame.draw.circle(self.pygameScreen, (0, 0, 255), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.visionDistance, 2)
+
+        self.redrawIndividuals()
 
     def nextDay(self):
         # handle the next day (remember pause points!)
 
         self.foodSpawner.spawnAndDrawFood()
         self.simulationPlayer.setStatusText("Food spawned.")
-        self.simulationPlayer.pausePoint()
 
         for individual in self.individualsList:
             if individual.energy <= 0:
                 individual.die()
 
         self.simulationPlayer.setStatusText("Killed 0 energy Individuals.")
-        self.simulationPlayer.pausePoint()
 
         for individual in self.individualsList:
             individual.eatFood()
 
         self.simulationPlayer.setStatusText("Individuals have eaten their food.")
-        self.simulationPlayer.pausePoint()
 
         for individual in self.individualsList:
             if individual.energy >= REPRODUCTIONENERGY:
                 individual.reproduce()
 
         self.simulationPlayer.setStatusText("Individuals have reproduced.")
-        self.simulationPlayer.pausePoint()
+
+        for individual in self.individualsList:
+            individual.move()
+        for food in self.foodSpawner.foodList:
+            food.individualMovingToSelf = False
+
+        self.simulationPlayer.setStatusText("Individuals have moved to their next best position.")
 
         for individual in self.individualsList:
             individual.energy -= 1
@@ -85,6 +87,9 @@ class Population:
             pygame.draw.circle(self.pygameScreen, (0, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), 8)
             pygame.draw.circle(self.pygameScreen, (255, 0, 0), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.eatingDistance, 2)
             pygame.draw.circle(self.pygameScreen, (0, 0, 255), (individual.location[0] + SIMULATIONDRAWOFFSETX, individual.location[1] + SIMULATIONDRAWOFFSETY), individual.visionDistance, 2)
+            font = pygame.font.SysFont('comicsans', 20)
+            text = font.render(str(individual.energy), 1, (0, 0, 0))
+            self.pygameScreen.blit(text, (individual.location[0] - (text.get_width() / 2) + SIMULATIONDRAWOFFSETX, individual.location[1] - 40 + SIMULATIONDRAWOFFSETY, 0, 0))
 
 
 class Individual:
@@ -142,6 +147,26 @@ class Individual:
 
     def die(self):
         self.population.individualsList.remove(self)
+
+    def move(self):
+        closestDistance = 9999
+        closestLocation = self.location
+        closestFood = None
+
+        for food in self.population.foodSpawner.foodList:
+            if not food.individualMovingToSelf:
+                distance = distanceBetween(food.location, self.location)
+                if distance <= self.visionDistance:
+                    if distance < closestDistance:
+                        closestDistance = distance
+                        closestLocation = food.location
+                        closestFood = food
+
+        self.location = closestLocation
+        try:
+            closestFood.individualMovingToSelf = True
+        except:
+            pass
         
 
 class FamilyTree:
@@ -157,39 +182,26 @@ class SimulationPlayer:
         self.simulationAreaSize = simulationAreaSize
         self.pygameScreen = pygameScreen
         self.currentStatusText = " "
-        
-    def pausePoint(self):
-        # handle a point that the "next pause point" button will bring you to
-
-        goToNextPoint = False
-
-        while not goToNextPoint:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    buttonPressed = simulationPlayer.checkForButtonPresses()
-                    if buttonPressed == "next":
-                        goToNextPoint = True
-
-            self.pygameScreen.fill((255, 255, 255))
-            pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
-            self.redrawSimulation()
-            pygame.draw.rect(self.pygameScreen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
-            pygame.draw.rect(self.pygameScreen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-            pygame.draw.rect(self.pygameScreen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400 + 2, WIDTH, SIMULATIONDRAWOFFSETY))
-            pygame.draw.rect(self.pygameScreen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-            self.redrawGUI()
-
-            buttonPressed = None
-
-            pygame.display.flip()
+        self.runAuto = False
 
     def redrawGUI(self):
         pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
+        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
+        pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
+        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
         font = pygame.font.SysFont('comicsans', 30)
-        text = font.render("Next", 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+        if not self.runAuto:
+            text = font.render("Next", 1, (0, 0, 0))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+        if self.runAuto:
+            text = font.render("Next", 1, (100, 100, 100))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+        if not self.runAuto:
+            text = font.render("Run", 1, (0, 0, 0))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+        if self.runAuto:
+            text = font.render("Stop", 1, (0, 0, 0))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
 
         text = font.render("Individuals alive: " + str(len(self.population.individualsList)), 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY / 4, 0, 0))
@@ -201,6 +213,11 @@ class SimulationPlayer:
         if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + 400 and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + 400 + SIMULATIONDRAWOFFSETY:
             if pygame.mouse.get_pos()[0] > SIMULATIONDRAWOFFSETX and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY:
                 return "next"
+            if pygame.mouse.get_pos()[0] > SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY + SIMULATIONDRAWOFFSETY:
+                if not self.runAuto:
+                    return "run"
+                if self.runAuto:
+                    return "stop"
         return None
 
     def redrawSimulation(self):
@@ -212,7 +229,12 @@ class SimulationPlayer:
 
         font = pygame.font.SysFont('comicsans', 20)
         text = font.render(text, 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))  
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))
+
+    def showDetailsOfIndividual(self, individual):
+        font = pygame.font.SysFont('comicsans', 25)
+        text = font.render("Generation", 1, (0, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
 
 
 class FoodSpawner:
@@ -240,32 +262,45 @@ class Food:
     def __init__(self, nutrition, location):
         self.nutrition = nutrition
         self.location = location
+        self.individualMovingToSelf = False
 
 
 # a = amount, m = mutation, e = eating, v = vision, f = food       a↓  m↓ e↓  v↓          f↓
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 5, 20, 50, screen, 200)
+simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 50)
 
 running = True
 while running:
     # main loop
     simulationPlayer.setStatusText("New day.")
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            buttonPressed = simulationPlayer.checkForButtonPresses()
-            if buttonPressed == "next":
-                simulationPlayer.population.nextDay()
-
     screen.fill((255, 255, 255))
     pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
     simulationPlayer.redrawSimulation()
     pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
     pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-    pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400 + 2, WIDTH, SIMULATIONDRAWOFFSETY))
+    pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
     pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
     simulationPlayer.redrawGUI()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            buttonPressed = simulationPlayer.checkForButtonPresses()
+            if buttonPressed == "next" and simulationPlayer.runAuto == False:
+                simulationPlayer.population.nextDay()
+            if buttonPressed == "run":
+                simulationPlayer.runAuto = True
+            if buttonPressed == "stop":
+                simulationPlayer.runAuto = False
+            for individual in simulationPlayer.population.individualsList:
+                print((pygame.mouse.get_pos()[0] + SIMULATIONDRAWOFFSETX, pygame.mouse.get_pos()[1] + SIMULATIONDRAWOFFSETY), individual.location)
+                if distanceBetween((pygame.mouse.get_pos()[0] - SIMULATIONDRAWOFFSETX, pygame.mouse.get_pos()[1] - SIMULATIONDRAWOFFSETY), individual.location) <= 8:
+                    print("sb1")
+                    simulationPlayer.showDetailsOfIndividual(individual)
+
+    if simulationPlayer.runAuto:
+        simulationPlayer.population.nextDay()
         
     buttonPressed = None
 
