@@ -52,3 +52,11 @@ Each day an Individual must use 1 energy to survive to the next day.
 If an Individual has 0 or less energy, it dies.
 
 When an Individual is born, it starts with 2 energy.
+
+## Food
+
+Food is the sole source of energy for Individuals.
+
+Food has a nutrition value, which defaults to 2.
+
+Food can be eaten when it is within an Individual's eating distance.
