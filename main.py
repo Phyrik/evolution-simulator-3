@@ -4,6 +4,13 @@ import time
 import sys
 import math
 import threading
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import math
+import os
+
+os.remove("population-graph.png")
 
 WIDTH = 1000
 HEIGHT = 500
@@ -38,6 +45,7 @@ class Population:
 
         self.amountOfAliveIndividuals = startingNumberOfIndividuals
         self.amountOfDeadIndividuals = 0
+        self.listOfPopulationEachDay = []
 
         self.individualsList = []
         for i in range(1, startingNumberOfIndividuals + 1):
@@ -133,6 +141,13 @@ class Population:
             individual.energy -= 1
 
         self.simulationPlayer.currentDay += 1
+        self.listOfPopulationEachDay.append(len(self.individualsList))
+
+        plt.clf()
+        plt.plot(self.listOfPopulationEachDay, label="Population")
+        xint = range(min(self.listOfPopulationEachDay), math.ceil(max(self.listOfPopulationEachDay)) + 1)
+        plt.legend()
+        plt.savefig("population-graph.png")
 
     def redrawIndividuals(self):
         for individual in self.individualsList:
@@ -277,6 +292,13 @@ class SimulationPlayer:
         text = font.render(self.currentStatusText, 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))
 
+        try:
+            populationGraph = pygame.image.load("population-graph.png")
+            populationGraph = pygame.transform.scale(populationGraph, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETX))
+            screen.blit(populationGraph, (0, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
+        except:
+            pass
+
         self.redrawDetails()
 
     def checkForButtonPresses(self):
@@ -288,6 +310,9 @@ class SimulationPlayer:
                     return "run"
                 if self.runAuto:
                     return "stop"
+        if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + 400 - SIMULATIONDRAWOFFSETX and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + 400:
+            if pygame.mouse.get_pos()[0] > 0 and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX:
+                return "popGraph"
         return None
 
     def redrawSimulation(self):
@@ -334,6 +359,9 @@ class SimulationPlayer:
                 font = pygame.font.SysFont('comicsans', 25)
                 text = font.render("Dead", 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
+
+    def openPopGraph(self):
+        
 
 
 class FoodSpawner:
@@ -392,6 +420,8 @@ while running:
                 simulationPlayer.runAuto = True
             if buttonPressed == "stop":
                 simulationPlayer.runAuto = False
+            if buttonPressed == "popGraph":
+                simulationPlayer.openPopGraph()
             for individual in simulationPlayer.population.individualsList:
                 if distanceBetween((pygame.mouse.get_pos()[0] - SIMULATIONDRAWOFFSETX, pygame.mouse.get_pos()[1] - SIMULATIONDRAWOFFSETY), individual.location) <= 8:
                     simulationPlayer.showDetailsOfIndividual(individual)
