@@ -60,3 +60,9 @@ Food is the sole source of energy for Individuals.
 Food has a nutrition value, which defaults to 2.
 
 Food can be eaten when it is within an Individual's eating distance.
+
+## Chart and Graph Area
+
+The Chart and Graph Area displays any charts and graphs to do with the simulation.
+
+The default graphs are population over time, average vision distance over time, and average eating distance over time.
