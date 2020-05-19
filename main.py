@@ -12,9 +12,10 @@ import os
 
 os.remove("population-graph.png")
 
-WIDTH = 1000
+WIDTH = 1200
 HEIGHT = 500
 SIMULATIONDRAWOFFSETX = 100
+SIMULATIONDRAWOFFSETXRIGHT = 300
 SIMULATIONDRAWOFFSETY = 50
 REPRODUCTIONENERGY = 10
 
@@ -148,6 +149,7 @@ class Population:
         plt.xlabel("Day")
         plt.ylabel("Population (Individuals)")
         plt.grid()
+        plt.title("Population Graph")
         plt.savefig("population-graph.png")
 
     def redrawIndividuals(self):
@@ -283,9 +285,9 @@ class SimulationPlayer:
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
 
         text = font.render("Day", 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
         text = font.render(str(self.currentDay), 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 20, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 20, 0, 0))
 
         text = font.render("Peak population: " + str(self.population.highestPopulation), 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
@@ -295,7 +297,7 @@ class SimulationPlayer:
 
         try:
             populationGraph = pygame.image.load("population-graph.png")
-            populationGraph = pygame.transform.scale(populationGraph, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETX))
+            populationGraph = pygame.transform.scale(populationGraph, (SIMULATIONDRAWOFFSETXRIGHT, SIMULATIONDRAWOFFSETXRIGHT))
             screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
         except:
             pass
