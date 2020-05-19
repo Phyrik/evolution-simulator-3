@@ -11,9 +11,11 @@ import math
 import os
 import statistics
 
-os.remove("population-graph.png")
-os.remove("vision-graph.png")
-os.remove("eating-graph.png")
+try:
+    os.remove("population-graph.png")
+    os.remove("vision-graph.png")
+    os.remove("eating-graph.png")
+except: pass
 
 WIDTH = 1200
 HEIGHT = 500
