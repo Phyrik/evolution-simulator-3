@@ -28,3 +28,27 @@ This Python simulation aims to explain and show evolution.
 8: [Chart and Graph Area](#chart-and-graph-area) - any graphs and charts about the simulation are displayed here.
 
 ### Simulation
+
+The simulation is the main aspect of evolution-simulator-3.
+
+It handles the [Individuals](#individuals), [food](#food), and anything else in the simulation area.
+
+### Individuals
+
+![An individual](https://imgur.com/g0YlFpn.png)
+
+Individuals are the only creatures in evolution-simulator-3.
+
+They consist of a black filled circle which is their body, two coloured rings representing their vision distance (blue) and eating distance (red), and some text above their body that signifies their energy.
+
+An individual's vision distance determines how far it can move each day.
+
+An individual's eating distance determines how close food has to be to the Individual for it to be eaten.
+
+Individuals can reproduce each day, which takes 10 energy.
+
+Each day an Individual must use 1 energy to survive to the next day.
+
+If an Individual has 0 or less energy, it dies.
+
+When an Individual is born, it starts with 2 energy.
