@@ -6,10 +6,12 @@ import math
 import threading
 import matplotlib
 matplotlib.use("Agg")
+matplotlib.rcParams.update({"font.size": 30})
 import matplotlib.pyplot as plt
 import math
 import os
 import statistics
+import argparse
 
 try:
     os.remove("population-graph.png")
@@ -24,6 +26,14 @@ SIMULATIONDRAWOFFSETXRIGHT = 300
 GRAPHWIDTH = 150
 SIMULATIONDRAWOFFSETY = 50
 REPRODUCTIONENERGY = 10
+
+parser = argparse.ArgumentParser(description="Run an evolution-simulator-3 simulation")
+parser.add_argument("-i", "--individuals", type=int, metavar="", help="The amount of Individuals to spawn at the start of the simulation", default=10)
+parser.add_argument("-f", "--food", type=int, metavar="", help="Amount of food to spawn each day", default=30)
+parser.add_argument("-v", "--vision", type=int, metavar="", help="Default vision distance for Individuals", default=50)
+parser.add_argument("-e", "--eating", type=int, metavar="", help="Default eating distance for Individuals", default=20)
+parser.add_argument("-m", "--mutation", type=int, metavar="", help="Default mutation chance of Individuals (in percent)", default=10)
+args = parser.parse_args()
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -155,11 +165,9 @@ class Population:
         # population graph
         plt.clf()
         plt.plot(self.listOfPopulationEachDay)
-        plt.xlabel("Day")
-        plt.ylabel("Population (Individuals)")
         plt.grid()
         plt.title("Population Graph")
-        plt.savefig("population-graph.png")
+        plt.savefig("population-graph.png", bbox_inches="tight")
 
         # vision graph
         plt.clf()
@@ -169,11 +177,9 @@ class Population:
         self.averageVisionDist = statistics.mean(visions)
         self.listOfAverageVisionDistEachDay.append(self.averageVisionDist)
         plt.plot(self.listOfAverageVisionDistEachDay)
-        plt.xlabel("Day")
-        plt.ylabel("Average Vision Distance (pixels)")
         plt.grid()
         plt.title("Vision Distance Graph")
-        plt.savefig("vision-graph.png")
+        plt.savefig("vision-graph.png", bbox_inches="tight")
 
         # eating graph
         plt.clf()
@@ -183,11 +189,9 @@ class Population:
         self.averageEatingDist = statistics.mean(eatings)
         self.listOfAverageEatingDistEachDay.append(self.averageEatingDist)
         plt.plot(self.listOfAverageEatingDistEachDay)
-        plt.xlabel("Day")
-        plt.ylabel("Average Eating Distance (pixels)")
         plt.grid()
         plt.title("Eating Distance Graph")
-        plt.savefig("eating-graph.png")
+        plt.savefig("eating-graph.png", bbox_inches="tight")
 
     def redrawIndividuals(self):
         for individual in self.individualsList:
@@ -335,21 +339,21 @@ class SimulationPlayer:
         try:
             populationGraph = pygame.image.load("population-graph.png")
             populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
         except:
             pass
 
         try:
             populationGraph = pygame.image.load("vision-graph.png")
-            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + GRAPHWIDTH, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
+            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH - 5, GRAPHWIDTH))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5 + GRAPHWIDTH, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
         except:
             pass
 
         try:
             populationGraph = pygame.image.load("eating-graph.png")
             populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
         except:
             pass
 
@@ -443,8 +447,7 @@ class Food:
         self.individualMovingToSelf = False
 
 
-# a = amount, m = mutation, e = eating, v = vision, f = food       a↓  m↓  e↓  v↓          f↓
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 30)
+simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, args.individuals, args.mutation, args.eating, args.vision, screen, args.food)
 
 running = True
 while running:

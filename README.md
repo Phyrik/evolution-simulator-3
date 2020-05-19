@@ -5,6 +5,14 @@ Sequel to [evolution-simulator-2](https://github.com/Phyrik/evolution-simulator-
 
 Based of the principles described in Primer's YouTube series on evolution.
 
+## Installation and running
+
+To install and run evolution-simulator-3 simply download the source code, ensure you have Python 3, Pygame, and matplotlib installed, and run
+
+```python3 main.py```
+
+in the terminal or command prompt
+
 ## User Manual
 
 This Python simulation aims to explain and show evolution.
