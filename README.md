@@ -11,7 +11,18 @@ To install and run evolution-simulator-3 simply download the source code, ensure
 
 ```python3 main.py```
 
-in the terminal or command prompt
+in the terminal or command prompt.
+
+### Command Line Arguments
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -i , --individuals   The amount of Individuals to spawn at the start of the
+                       simulation
+  -f , --food          Amount of food to spawn each day
+  -v , --vision        Default vision distance for Individuals
+  -e , --eating        Default eating distance for Individuals
+  -m , --mutation      Default mutation chance of Individuals (in percent)
 
 ## User Manual
 
