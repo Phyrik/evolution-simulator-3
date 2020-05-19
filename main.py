@@ -360,9 +360,6 @@ class SimulationPlayer:
                 text = font.render("Dead", 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
 
-    def openPopGraph(self):
-        
-
 
 class FoodSpawner:
     def __init__(self, foodToSpawnEachTurn, simulationAreaSize, pygameScreen):
