@@ -9,13 +9,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import math
 import os
+import statistics
 
 os.remove("population-graph.png")
+os.remove("vision-graph.png")
+os.remove("eating-graph.png")
 
 WIDTH = 1200
 HEIGHT = 500
 SIMULATIONDRAWOFFSETX = 100
 SIMULATIONDRAWOFFSETXRIGHT = 300
+GRAPHWIDTH = 150
 SIMULATIONDRAWOFFSETY = 50
 REPRODUCTIONENERGY = 10
 
@@ -47,6 +51,8 @@ class Population:
         self.amountOfAliveIndividuals = startingNumberOfIndividuals
         self.amountOfDeadIndividuals = 0
         self.listOfPopulationEachDay = []
+        self.listOfAverageVisionDistEachDay = []
+        self.listOfAverageEatingDistEachDay = []
 
         self.individualsList = []
         for i in range(1, startingNumberOfIndividuals + 1):
@@ -144,6 +150,7 @@ class Population:
         self.simulationPlayer.currentDay += 1
         self.listOfPopulationEachDay.append(len(self.individualsList))
 
+        # population graph
         plt.clf()
         plt.plot(self.listOfPopulationEachDay)
         plt.xlabel("Day")
@@ -151,6 +158,34 @@ class Population:
         plt.grid()
         plt.title("Population Graph")
         plt.savefig("population-graph.png")
+
+        # vision graph
+        plt.clf()
+        visions = []
+        for individual in self.individualsList:
+            visions.append(individual.visionDistance)
+        self.averageVisionDist = statistics.mean(visions)
+        self.listOfAverageVisionDistEachDay.append(self.averageVisionDist)
+        plt.plot(self.listOfAverageVisionDistEachDay)
+        plt.xlabel("Day")
+        plt.ylabel("Average Vision Distance (pixels)")
+        plt.grid()
+        plt.title("Vision Distance Graph")
+        plt.savefig("vision-graph.png")
+
+        # eating graph
+        plt.clf()
+        eatings = []
+        for individual in self.individualsList:
+            eatings.append(individual.eatingDistance)
+        self.averageEatingDist = statistics.mean(eatings)
+        self.listOfAverageEatingDistEachDay.append(self.averageEatingDist)
+        plt.plot(self.listOfAverageEatingDistEachDay)
+        plt.xlabel("Day")
+        plt.ylabel("Average Eating Distance (pixels)")
+        plt.grid()
+        plt.title("Eating Distance Graph")
+        plt.savefig("eating-graph.png")
 
     def redrawIndividuals(self):
         for individual in self.individualsList:
@@ -297,7 +332,21 @@ class SimulationPlayer:
 
         try:
             populationGraph = pygame.image.load("population-graph.png")
-            populationGraph = pygame.transform.scale(populationGraph, (SIMULATIONDRAWOFFSETXRIGHT, SIMULATIONDRAWOFFSETXRIGHT))
+            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
+        except:
+            pass
+
+        try:
+            populationGraph = pygame.image.load("vision-graph.png")
+            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + GRAPHWIDTH, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
+        except:
+            pass
+
+        try:
+            populationGraph = pygame.image.load("eating-graph.png")
+            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
             screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
         except:
             pass
