@@ -144,9 +144,10 @@ class Population:
         self.listOfPopulationEachDay.append(len(self.individualsList))
 
         plt.clf()
-        plt.plot(self.listOfPopulationEachDay, label="Population")
-        xint = range(min(self.listOfPopulationEachDay), math.ceil(max(self.listOfPopulationEachDay)) + 1)
-        plt.legend()
+        plt.plot(self.listOfPopulationEachDay)
+        plt.xlabel("Day")
+        plt.ylabel("Population (Individuals)")
+        plt.grid()
         plt.savefig("population-graph.png")
 
     def redrawIndividuals(self):
@@ -390,7 +391,7 @@ class Food:
 
 
 # a = amount, m = mutation, e = eating, v = vision, f = food       a↓  m↓  e↓  v↓          f↓
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 100)
+simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 30)
 
 running = True
 while running:
