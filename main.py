@@ -16,7 +16,7 @@ WIDTH = 1000
 HEIGHT = 500
 SIMULATIONDRAWOFFSETX = 100
 SIMULATIONDRAWOFFSETY = 50
-REPRODUCTIONENERGY = 4
+REPRODUCTIONENERGY = 10
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -295,7 +295,7 @@ class SimulationPlayer:
         try:
             populationGraph = pygame.image.load("population-graph.png")
             populationGraph = pygame.transform.scale(populationGraph, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETX))
-            screen.blit(populationGraph, (0, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
         except:
             pass
 
@@ -370,7 +370,7 @@ class FoodSpawner:
 
     def spawnAndDrawFood(self):
         for i in range(1, self.foodToSpawnEachTurn):
-            food = Food(1, [random.randint(0, self.simulationAreaSize["width"]), random.randint(0, self.simulationAreaSize["height"])])
+            food = Food(2, [random.randint(0, self.simulationAreaSize["width"]), random.randint(0, self.simulationAreaSize["height"])])
             self.foodList.append(food)
             pygame.draw.circle(self.pygameScreen, (0, 0, 0), (food.location[0] + SIMULATIONDRAWOFFSETX, food.location[1] + SIMULATIONDRAWOFFSETY), 2)
 
@@ -390,7 +390,7 @@ class Food:
 
 
 # a = amount, m = mutation, e = eating, v = vision, f = food       a↓  m↓  e↓  v↓          f↓
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 30)
+simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, 10, 10, 20, 50, screen, 100)
 
 running = True
 while running:
