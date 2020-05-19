@@ -17,17 +17,17 @@ in the terminal or command prompt.
 
 optional arguments:
 
-  -h, --help           show this help message and exit
+  -h, --help: show this help message and exit
 
-  -i , --individuals   The amount of Individuals to spawn at the start of the simulation
+  -i , --individuals: The amount of Individuals to spawn at the start of the simulation
 
-  -f , --food          Amount of food to spawn each day
+  -f , --food: Amount of food to spawn each day
 
-  -v , --vision        Default vision distance for Individuals
+  -v , --vision: Default vision distance for Individuals
 
-  -e , --eating        Default eating distance for Individuals
+  -e , --eating: Default eating distance for Individuals
   
-  -m , --mutation      Default mutation chance of Individuals (in percent)
+  -m , --mutation: Default mutation chance of Individuals (in percent)
 
 ## User Manual
 
