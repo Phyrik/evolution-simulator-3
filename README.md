@@ -89,4 +89,4 @@ Food can be eaten when it is within an Individual's eating distance.
 
 The Chart and Graph Area displays any charts and graphs to do with the simulation.
 
-The default graphs are population over time, average vision distance over time, and average eating distance over time.
+The default graph is population over time.
