@@ -23,7 +23,7 @@ WIDTH = 1200
 HEIGHT = 500
 SIMULATIONDRAWOFFSETX = 100
 SIMULATIONDRAWOFFSETXRIGHT = 300
-GRAPHWIDTH = 150
+GRAPHWIDTH = 300
 SIMULATIONDRAWOFFSETY = 50
 REPRODUCTIONENERGY = 10
 
@@ -126,8 +126,9 @@ class Population:
         pygame.display.flip()
 
         for individual in self.individualsList:
-            if individual.energy >= REPRODUCTIONENERGY:
-                individual.reproduce()
+            while individual.energy >= REPRODUCTIONENERGY:
+                if individual.energy >= REPRODUCTIONENERGY:
+                    individual.reproduce()
 
         self.simulationPlayer.setStatusText("Individuals have reproduced.")
         screen.fill((255, 255, 255))
@@ -338,24 +339,9 @@ class SimulationPlayer:
 
         try:
             populationGraph = pygame.image.load("population-graph.png")
-            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
-        except:
-            pass
-
-        try:
-            populationGraph = pygame.image.load("vision-graph.png")
             populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH - 5, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5 + GRAPHWIDTH, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH * 2, 0, 0))
-        except:
-            pass
-
-        try:
-            populationGraph = pygame.image.load("eating-graph.png")
-            populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - populationGraph.get_height(), 0, 0))
-        except:
-            pass
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH, 0, 0))
+        except: pass
 
         self.redrawDetails()
 
