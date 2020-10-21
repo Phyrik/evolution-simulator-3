@@ -2,16 +2,18 @@ import pygame, pygame.key
 import random
 import time
 import sys
-import math
 import threading
 import matplotlib
 matplotlib.use("Agg")
 matplotlib.rcParams.update({"font.size": 30})
 import matplotlib.pyplot as plt
-import math
 import os
 import statistics
 import argparse
+
+# custom module imports
+
+import modules.utilfunctions as utilfunctions
 
 try:
     os.remove("population-graph.png")
@@ -19,8 +21,10 @@ try:
     os.remove("eating-graph.png")
 except: pass
 
-WIDTH = 1200
-HEIGHT = 500
+WIDTH = 1500
+HEIGHT = 700
+SIMWIDTH = 1100
+SIMHEIGHT = 600
 SIMULATIONDRAWOFFSETX = 100
 SIMULATIONDRAWOFFSETXRIGHT = 300
 GRAPHWIDTH = 300
@@ -39,16 +43,8 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("evolution-simulator-3")
 
-def distanceBetween(a, b):
-    xa = a[0]
-    xb = b[0]
-    ya = a[1]
-    yb = b[1]
-
-    return math.sqrt(((xa - xb)**2) + ((ya - yb)**2))
 
 # main evolution classes
-
 
 class Population:
     def __init__(self, startingNumberOfIndividuals, baseMutationChancePercent, baseEatingDistance, baseVisionDistance, simulationAreaSize, pygameScreen, foodToSpawnEachTurn, simulationPlayer):
@@ -88,12 +84,12 @@ class Population:
         self.foodSpawner.spawnAndDrawFood()
         self.simulationPlayer.setStatusText("Food spawned.")
         screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
         simulationPlayer.redrawSimulation()
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
         simulationPlayer.redrawGUI()
         pygame.display.flip()
 
@@ -103,12 +99,12 @@ class Population:
 
         self.simulationPlayer.setStatusText("Killed 0 energy Individuals.")
         screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
         simulationPlayer.redrawSimulation()
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
         simulationPlayer.redrawGUI()
         pygame.display.flip()
 
@@ -117,12 +113,12 @@ class Population:
 
         self.simulationPlayer.setStatusText("Individuals have eaten their food.")
         screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
         simulationPlayer.redrawSimulation()
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
         simulationPlayer.redrawGUI()
         pygame.display.flip()
 
@@ -133,12 +129,12 @@ class Population:
 
         self.simulationPlayer.setStatusText("Individuals have reproduced.")
         screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
         simulationPlayer.redrawSimulation()
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
         simulationPlayer.redrawGUI()
         pygame.display.flip()
 
@@ -149,12 +145,12 @@ class Population:
 
         self.simulationPlayer.setStatusText("Individuals have moved to their next best position.")
         screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
         simulationPlayer.redrawSimulation()
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
         pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
         simulationPlayer.redrawGUI()
         pygame.display.flip()
 
@@ -166,27 +162,29 @@ class Population:
         self.lifeExpectancies = []
         for individual in self.individualsList:
             self.lifeExpectancies.append(individual.yearsAlive)
-        self.averageLifeExpectancy = statistics.mean(self.lifeExpectancies)
-        self.listOfAverageLifeExpectanciesPerDay.append(self.averageLifeExpectancy)
+        try:
+            self.averageLifeExpectancy = statistics.mean(self.lifeExpectancies)
+            self.listOfAverageLifeExpectanciesPerDay.append(self.averageLifeExpectancy)
 
-        # life expectancy graph graph
-        plt.clf()
-        plt.plot(self.listOfAverageLifeExpectanciesPerDay)
-        plt.grid()
-        plt.title("Life Expectancy")
-        plt.xlabel("Day")
-        plt.ylabel("Average Lifespan")
-        self.simulationPlayer.setStatusText("Saving life expectancy graph graph.")
-        screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
-        simulationPlayer.redrawSimulation()
-        pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-        simulationPlayer.redrawGUI()
-        pygame.display.flip()
-        plt.savefig("life-expectancy-graph.png", bbox_inches="tight")
+            # life expectancy graph graph
+            plt.clf()
+            plt.plot(self.listOfAverageLifeExpectanciesPerDay)
+            plt.grid()
+            plt.title("Life Expectancy")
+            plt.xlabel("Day")
+            plt.ylabel("Average Lifespan")
+            self.simulationPlayer.setStatusText("Saving life expectancy graph graph.")
+            screen.fill((255, 255, 255))
+            pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
+            simulationPlayer.redrawSimulation()
+            pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
+            pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+            pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+            pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+            simulationPlayer.redrawGUI()
+            pygame.display.flip()
+            plt.savefig("life-expectancy-graph.png", bbox_inches="tight")
+        except: pass        
 
     def redrawIndividuals(self):
         for individual in self.individualsList:
@@ -216,7 +214,7 @@ class Individual:
 
     def eatFood(self):
         for food in self.population.foodSpawner.foodList:
-            distance = distanceBetween(food.location, self.location)
+            distance = utilfunctions.distanceBetween(food.location, self.location)
             if distance <= self.eatingDistance:
                 self.energy += food.nutrition
                 self.population.foodSpawner.destroy(food)
@@ -255,6 +253,7 @@ class Individual:
 
         child = Individual(childEatingDistance, childVisionDistance, childMutationChancePercent, self, self.familyTree.generation + 1, self.location, self.population)
         self.population.individualsList.append(child)
+        self.familyTree.children.append(child)
         self.energy -= REPRODUCTIONENERGY
 
     def die(self):
@@ -268,7 +267,7 @@ class Individual:
 
         for food in self.population.foodSpawner.foodList:
             if not food.individualMovingToSelf:
-                distance = distanceBetween(food.location, self.location)
+                distance = utilfunctions.distanceBetween(food.location, self.location)
                 if distance <= self.visionDistance:
                     if distance < closestDistance:
                         closestDistance = distance
@@ -300,48 +299,48 @@ class SimulationPlayer:
         self.currentDay = 0
 
     def redrawGUI(self):
-        pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
-        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
-        pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
-        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
+        pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + SIMHEIGHT, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
+        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY + SIMHEIGHT, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
+        pygame.draw.rect(self.pygameScreen, (200, 200, 200), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + SIMHEIGHT, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 0)
+        pygame.draw.rect(self.pygameScreen, (0, 0, 0), (SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + SIMHEIGHT, SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY), 1)
         font = pygame.font.SysFont('comicsans', 30)
         if not self.runAuto:
             text = font.render("Next", 1, (0, 0, 0))
-            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + SIMHEIGHT + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
         if self.runAuto:
             text = font.render("Next", 1, (100, 100, 100))
-            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2), SIMULATIONDRAWOFFSETY + SIMHEIGHT + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
         if not self.runAuto:
             text = font.render("Run", 1, (0, 0, 0))
-            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + SIMHEIGHT + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
         if self.runAuto:
             text = font.render("Stop", 1, (0, 0, 0))
-            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + 400 + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
+            self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + (SIMULATIONDRAWOFFSETY / 2 - text.get_width() / 2) + SIMULATIONDRAWOFFSETY, SIMULATIONDRAWOFFSETY + SIMHEIGHT + (SIMULATIONDRAWOFFSETY / 2 - text.get_height() / 2)))
 
         text = font.render("Individuals alive: " + str(len(self.population.individualsList)), 1, (0, 0, 0))
         self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
 
         text = font.render("Day", 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + SIMWIDTH + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
         text = font.render(str(self.currentDay), 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 20, 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + SIMWIDTH + SIMULATIONDRAWOFFSETXRIGHT / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 20, 0, 0))
 
         text = font.render("Peak population: " + str(self.population.highestPopulation), 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + SIMWIDTH - text.get_width(), SIMULATIONDRAWOFFSETY - text.get_height(), 0, 0))
 
         text = font.render(self.currentStatusText, 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + SIMWIDTH - text.get_width(), HEIGHT - text.get_height()))
 
         try:
-            populationGraph = pygame.image.load("population-graph.png")
+            populationGraph = pygame.image.load("life-expectancy-graph.png")
             populationGraph = pygame.transform.scale(populationGraph, (GRAPHWIDTH - 5, GRAPHWIDTH))
-            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + 800 + 5, SIMULATIONDRAWOFFSETY + 400 - GRAPHWIDTH, 0, 0))
+            screen.blit(populationGraph, (SIMULATIONDRAWOFFSETX + SIMWIDTH + 5, SIMULATIONDRAWOFFSETY + SIMHEIGHT - GRAPHWIDTH, 0, 0))
         except: pass
 
         self.redrawDetails()
 
     def checkForButtonPresses(self):
-        if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + 400 and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + 400 + SIMULATIONDRAWOFFSETY:
+        if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + SIMHEIGHT and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + SIMHEIGHT + SIMULATIONDRAWOFFSETY:
             if pygame.mouse.get_pos()[0] > SIMULATIONDRAWOFFSETX and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY:
                 return "next"
             if pygame.mouse.get_pos()[0] > SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX + SIMULATIONDRAWOFFSETY + SIMULATIONDRAWOFFSETY:
@@ -349,7 +348,7 @@ class SimulationPlayer:
                     return "run"
                 if self.runAuto:
                     return "stop"
-        if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + 400 - SIMULATIONDRAWOFFSETX and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + 400:
+        if pygame.mouse.get_pos()[1] > SIMULATIONDRAWOFFSETY + SIMHEIGHT - SIMULATIONDRAWOFFSETX and pygame.mouse.get_pos()[1] < SIMULATIONDRAWOFFSETY + SIMHEIGHT:
             if pygame.mouse.get_pos()[0] > 0 and pygame.mouse.get_pos()[0] < SIMULATIONDRAWOFFSETX:
                 return "popGraph"
         return None
@@ -363,7 +362,7 @@ class SimulationPlayer:
 
         font = pygame.font.SysFont('comicsans', 20)
         text = font.render(text, 1, (0, 0, 0))
-        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + 800 - text.get_width(), HEIGHT - text.get_height()))
+        self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX + SIMWIDTH - text.get_width(), HEIGHT - text.get_height()))
 
     def showDetailsOfIndividual(self, individual):
         if self.currentIndividualForDetails != None:
@@ -379,25 +378,39 @@ class SimulationPlayer:
                 smallFont = pygame.font.SysFont('comicsans', 25)
                 bigFont = pygame.font.SysFont('comicsans', 40)
 
+                text = smallFont.render("Energy", 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 0, 0, 0))
+                text = bigFont.render(str(self.currentIndividualForDetails.energy), 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 0 + 15, 0, 0))
+
                 text = smallFont.render("Generation", 1, (0, 0, 0))
-                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 1, 0, 0))
                 text = bigFont.render(str(self.currentIndividualForDetails.familyTree.generation), 1, (0, 0, 0))
-                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 15, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 1 + 15, 0, 0))
 
                 text = smallFont.render("Eating Dist.", 1, (0, 0, 0))
-                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60, 0, 0))
-                text = bigFont.render(str(self.currentIndividualForDetails.eatingDistance), 1, (0, 0, 0))
-                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 + 15, 0, 0))
-
-                text = smallFont.render("Vision Dist.", 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 2, 0, 0))
-                text = bigFont.render(str(self.currentIndividualForDetails.visionDistance), 1, (0, 0, 0))
+                text = bigFont.render(str(self.currentIndividualForDetails.eatingDistance), 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 2 + 15, 0, 0))
 
-                text = smallFont.render("Years Alive", 1, (0, 0, 0))
+                text = smallFont.render("Vision Dist.", 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 3, 0, 0))
-                text = bigFont.render(str(self.currentIndividualForDetails.yearsAlive), 1, (0, 0, 0))
+                text = bigFont.render(str(self.currentIndividualForDetails.visionDistance), 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 3 + 15, 0, 0))
+
+                text = smallFont.render("Years Alive", 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 4, 0, 0))
+                text = bigFont.render(str(self.currentIndividualForDetails.yearsAlive), 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 4 + 15, 0, 0))
+
+                text = smallFont.render("Alive Childr.", 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 5, 0, 0))
+                aliveChildren = 0
+                for child in self.currentIndividualForDetails.familyTree.children:
+                    if (child.state == "alive"):
+                        aliveChildren += 1
+                text = bigFont.render(str(aliveChildren), 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 5 + 15, 0, 0))
 
             if self.currentIndividualForDetails.state == "dead":
                 font = pygame.font.SysFont('comicsans', 25)
@@ -433,7 +446,7 @@ class Food:
         self.individualMovingToSelf = False
 
 
-simulationPlayer = SimulationPlayer({"width": 800, "height": 400}, args.individuals, args.mutation, args.eating, args.vision, screen, args.food)
+simulationPlayer = SimulationPlayer({"width": SIMWIDTH, "height": SIMHEIGHT}, args.individuals, args.mutation, args.eating, args.vision, screen, args.food)
 
 running = True
 while running:
@@ -441,16 +454,17 @@ while running:
     simulationPlayer.setStatusText("New day.")
 
     screen.fill((255, 255, 255))
-    pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+    pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, SIMWIDTH, SIMHEIGHT), 2)
     simulationPlayer.redrawSimulation()
     pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
     pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
-    pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
-    pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+    pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + SIMHEIGHT, WIDTH, SIMULATIONDRAWOFFSETY))
+    pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + SIMWIDTH + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
     simulationPlayer.redrawGUI()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            os.remove("life-expectancy-graph.png")
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             buttonPressed = simulationPlayer.checkForButtonPresses()
@@ -463,7 +477,7 @@ while running:
             if buttonPressed == "popGraph":
                 simulationPlayer.openPopGraph()
             for individual in simulationPlayer.population.individualsList:
-                if distanceBetween((pygame.mouse.get_pos()[0] - SIMULATIONDRAWOFFSETX, pygame.mouse.get_pos()[1] - SIMULATIONDRAWOFFSETY), individual.location) <= 8:
+                if utilfunctions.distanceBetween((pygame.mouse.get_pos()[0] - SIMULATIONDRAWOFFSETX, pygame.mouse.get_pos()[1] - SIMULATIONDRAWOFFSETY), individual.location) <= 8:
                     simulationPlayer.showDetailsOfIndividual(individual)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
