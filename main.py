@@ -65,6 +65,7 @@ class Population:
         self.listOfPopulationEachDay = []
         self.listOfAverageVisionDistEachDay = []
         self.listOfAverageEatingDistEachDay = []
+        self.listOfAverageLifeExpectanciesPerDay = []
 
         self.individualsList = []
         for i in range(1, startingNumberOfIndividuals + 1):
@@ -159,40 +160,33 @@ class Population:
 
         for individual in self.individualsList:
             individual.energy -= 1
+            individual.yearsAlive += 1
 
         self.simulationPlayer.currentDay += 1
-        self.listOfPopulationEachDay.append(len(self.individualsList))
-
-        # population graph
-        plt.clf()
-        plt.plot(self.listOfPopulationEachDay)
-        plt.grid()
-        plt.title("Population Graph")
-        plt.savefig("population-graph.png", bbox_inches="tight")
-
-        # vision graph
-        plt.clf()
-        visions = []
+        self.lifeExpectancies = []
         for individual in self.individualsList:
-            visions.append(individual.visionDistance)
-        self.averageVisionDist = statistics.mean(visions)
-        self.listOfAverageVisionDistEachDay.append(self.averageVisionDist)
-        plt.plot(self.listOfAverageVisionDistEachDay)
-        plt.grid()
-        plt.title("Vision Distance Graph")
-        plt.savefig("vision-graph.png", bbox_inches="tight")
+            self.lifeExpectancies.append(individual.yearsAlive)
+        self.averageLifeExpectancy = statistics.mean(self.lifeExpectancies)
+        self.listOfAverageLifeExpectanciesPerDay.append(self.averageLifeExpectancy)
 
-        # eating graph
+        # life expectancy graph graph
         plt.clf()
-        eatings = []
-        for individual in self.individualsList:
-            eatings.append(individual.eatingDistance)
-        self.averageEatingDist = statistics.mean(eatings)
-        self.listOfAverageEatingDistEachDay.append(self.averageEatingDist)
-        plt.plot(self.listOfAverageEatingDistEachDay)
+        plt.plot(self.listOfAverageLifeExpectanciesPerDay)
         plt.grid()
-        plt.title("Eating Distance Graph")
-        plt.savefig("eating-graph.png", bbox_inches="tight")
+        plt.title("Life Expectancy")
+        plt.xlabel("Day")
+        plt.ylabel("Average Lifespan")
+        self.simulationPlayer.setStatusText("Saving life expectancy graph graph.")
+        screen.fill((255, 255, 255))
+        pygame.draw.rect(screen, (0, 0, 0), (SIMULATIONDRAWOFFSETX, SIMULATIONDRAWOFFSETY, 800, 400), 2)
+        simulationPlayer.redrawSimulation()
+        pygame.draw.rect(screen, (255, 255, 255), (0, 0, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (0, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (0, SIMULATIONDRAWOFFSETY + 400, WIDTH, SIMULATIONDRAWOFFSETY))
+        pygame.draw.rect(screen, (255, 255, 255), (SIMULATIONDRAWOFFSETX + 800 + 1, 0, SIMULATIONDRAWOFFSETX, HEIGHT))
+        simulationPlayer.redrawGUI()
+        pygame.display.flip()
+        plt.savefig("life-expectancy-graph.png", bbox_inches="tight")
 
     def redrawIndividuals(self):
         for individual in self.individualsList:
@@ -218,6 +212,7 @@ class Individual:
         self.energy = 2
         self.state = "alive"
         self.selected = False
+        self.yearsAlive = 0
 
     def eatFood(self):
         for food in self.population.foodSpawner.foodList:
@@ -398,6 +393,11 @@ class SimulationPlayer:
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 2, 0, 0))
                 text = bigFont.render(str(self.currentIndividualForDetails.visionDistance), 1, (0, 0, 0))
                 self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 2 + 15, 0, 0))
+
+                text = smallFont.render("Years Alive", 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 3, 0, 0))
+                text = bigFont.render(str(self.currentIndividualForDetails.yearsAlive), 1, (0, 0, 0))
+                self.pygameScreen.blit(text, (SIMULATIONDRAWOFFSETX / 2 - text.get_width() / 2, SIMULATIONDRAWOFFSETY + 60 * 3 + 15, 0, 0))
 
             if self.currentIndividualForDetails.state == "dead":
                 font = pygame.font.SysFont('comicsans', 25)
